@@ -102,4 +102,9 @@ class Users extends \yii\db\ActiveRecord
             'time_zone' => 'Time Zone',
         ];
     }
+
+	public function validatePassword($password)
+	{
+		return $this->password === MD5($password);
+	}
 }
