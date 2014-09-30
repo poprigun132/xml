@@ -94,7 +94,8 @@ a.desc:after {
 	display: inline-block;
 	margin: 5px;
 	border: 1px solid #8b8b8b;
-	max-width: 380px;
+
+	padding: 5px;
 }
 
 .center-block {
@@ -104,6 +105,7 @@ a.desc:after {
 .choose-shop {
 	min-width: 370px;
 	margin-top: 5px;
+	display: block;
 }
 
 .dropdown-menu {

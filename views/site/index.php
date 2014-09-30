@@ -1,10 +1,9 @@
 <?php
 /* @var $this yii\web\View */
 $this->title = 'Кабинет настройки XML шаблонов';
-?><?Yii::$app->request->getQueryParams()?>
+?>
 <div class="site-index">
-	<div class="left-block"><?
-		echo \yii\bootstrap\Nav::widget([
+	<div class="left-block"><?= \yii\bootstrap\Nav::widget([
 				'options' => ['class' => 'nav nav-pills'],
 				'items' => [
 					[
@@ -42,6 +41,16 @@ $this->title = 'Кабинет настройки XML шаблонов';
 				],
 				'dropdown' => [
 					'items' => $shops,
+				],
+			]);
+		?><br>
+		<?= \yii\bootstrap\ButtonDropdown::widget([
+				'label' => $templateId != '' ? $templates[$templateId]['label'] : 'Выбор Шаблона',
+				'options' => [
+					'class'=>'choose-shop'
+				],
+				'dropdown' => [
+					'items' => $templates,
 				],
 			]);
 		?>

@@ -49,6 +49,7 @@
         "asset-installer-paths": {
             "npm-asset-library": "vendor/npm",
             "bower-asset-library": "vendor/bower"
-        }
+        },
+		"sammaye/yii2-jstree": "dev-master"
     }
 }

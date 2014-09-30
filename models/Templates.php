@@ -8,6 +8,7 @@ use Yii;
  * This is the model class for table "templates".
  *
  * @property integer $id
+ * @property string $name
  * @property string $template
  * @property integer $shopId
  * @property integer $userId
@@ -24,23 +25,16 @@ class Templates extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\Connection the database connection used by this AR class.
-     */
-    public static function getDb()
-    {
-        return Yii::$app->get('db');
-    }
-
-    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['template', 'shopId', 'userId'], 'required'],
+            [['name', 'template', 'shopId', 'userId'], 'required'],
             [['template'], 'string'],
             [['shopId', 'userId'], 'integer'],
-            [['createDate'], 'safe']
+            [['createDate'], 'safe'],
+            [['name'], 'string', 'max' => 50]
         ];
     }
 
@@ -51,6 +45,7 @@ class Templates extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'name' => 'Name',
             'template' => 'Template',
             'shopId' => 'Shop ID',
             'userId' => 'User ID',

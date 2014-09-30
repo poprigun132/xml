@@ -11,6 +11,7 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use yii\web\UrlManager;
 
 class SiteController extends Controller
 {
@@ -57,17 +58,36 @@ class SiteController extends Controller
         ];
     }
 
-    public function actionIndex()
+    public function actionIndex($shopId = false, $templateId = false)
     {
+//		$shopId = Yii::$app->request->getQueryParam('shopId');
+//		$templateId = Yii::$app->request->getQueryParam('templateId');
+		$urlManager = new UrlManager();
+		$urlManager->enablePrettyUrl = true;
+		$urlManager->showScriptName = false;
+		//$urlManager->setBaseUrl( Yii::$app->request->url );
 		$users = Users::find()->where(['id_user'=>Yii::$app->user->id])->one();;
 		$userShops = $users->getUserShops();
-		$shops = [];
-		foreach($userShops as $k=>$v) {
-			$shops[$k]['label'] = $v->name;
-			$shops[$k]['url'] = "?shopId=".$v->id_shop;
+
+		$shops = Shops::find()->where(['id_shop'=>$shopId])->one();
+		$templates = [];
+		if( is_object($shops) ){
+			$templates = $shops->getTemplates()->all();
 		}
-		$shopId = Yii::$app->request->getQueryParam('shopId');
-		return $this->render('index', ['shops'=>$shops, 'shopId'=>$shopId]);
+
+
+		$_shops = [];
+		foreach($userShops as $k=>$v) {
+			$_shops[$k]['label'] = $v->name;
+			$_shops[$k]['url'] = $urlManager->createUrl( ['shopId'=>$v->id_shop] );
+		}
+
+		$_templates = [];
+		foreach($templates as $k=>$v) {
+			$_templates[$v->id]['label'] = $v->name;
+			$_templates[$v->id]['url'] = $urlManager->createUrl( ['shopId'=>$shopId, 'templateId'=>$v->id] );
+		}
+		return $this->render('index', ['shops'=>$_shops, 'shopId'=>$shopId, 'templates'=>$_templates, 'templateId'=>$templateId]);
     }
 
     public function actionLogin()
