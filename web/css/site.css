@@ -90,17 +90,15 @@ a.desc:after {
     margin: 0 0 15px 0;
 }
 
-.left-block {
+.left-block, .center-block{
 	display: inline-block;
-	margin: 5px;
+	margin-top: 5px;
 	border: 1px solid #8b8b8b;
-
+	border-radius: 5px;
 	padding: 5px;
+	vertical-align: top;
 }
 
-.center-block {
-	display: inline-block;
-}
 
 .choose-shop {
 	min-width: 370px;

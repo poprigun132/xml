@@ -60,12 +60,10 @@ class SiteController extends Controller
 
     public function actionIndex($shopId = false, $templateId = false)
     {
-//		$shopId = Yii::$app->request->getQueryParam('shopId');
-//		$templateId = Yii::$app->request->getQueryParam('templateId');
 		$urlManager = new UrlManager();
 		$urlManager->enablePrettyUrl = true;
 		$urlManager->showScriptName = false;
-		//$urlManager->setBaseUrl( Yii::$app->request->url );
+
 		$users = Users::find()->where(['id_user'=>Yii::$app->user->id])->one();;
 		$userShops = $users->getUserShops();
 
@@ -79,13 +77,20 @@ class SiteController extends Controller
 		$_shops = [];
 		foreach($userShops as $k=>$v) {
 			$_shops[$k]['label'] = $v->name;
-			$_shops[$k]['url'] = $urlManager->createUrl( ['shopId'=>$v->id_shop] );
+			$_shops[$k]['url'] = $urlManager->createUrl( [
+					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
+					'shopId'=>$v->id_shop
+				] );
 		}
 
 		$_templates = [];
 		foreach($templates as $k=>$v) {
 			$_templates[$v->id]['label'] = $v->name;
-			$_templates[$v->id]['url'] = $urlManager->createUrl( ['shopId'=>$shopId, 'templateId'=>$v->id] );
+			$_templates[$v->id]['url'] = $urlManager->createUrl( [
+					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
+					'shopId'=>$shopId,
+					'templateId'=>$v->id
+				] );
 		}
 		return $this->render('index', ['shops'=>$_shops, 'shopId'=>$shopId, 'templates'=>$_templates, 'templateId'=>$templateId]);
     }
