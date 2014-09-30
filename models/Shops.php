@@ -91,13 +91,6 @@ class Shops extends \yii\db\ActiveRecord
 		return Yii::$app->get('db_AP');
 	}
 
-	public function getTemplates()
-	{
-		return $this->hasMany('app\models\Templates', ['shopId' => 'id_shop']);
-		// Первый параметр – это у нас имя класса, с которым мы настраиваем связь.
-		// Во втором параметре в виде массива задаётся имя удалённого PK ключа  (id) и FK из текущей таблицы модели, которые связываются между собой
-	}
-
 	/**
 	 * @inheritdoc
 	 */

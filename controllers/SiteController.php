@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Shops;
+use app\models\Templates;
 use app\models\User;
 use app\models\Users;
 use Yii;
@@ -64,22 +65,27 @@ class SiteController extends Controller
 		$urlManager->enablePrettyUrl = true;
 		$urlManager->showScriptName = false;
 
+
+
 		$users = Users::find()->where(['id_user'=>Yii::$app->user->id])->one();;
 		$userShops = $users->getUserShops();
+		$templates = Templates::find()->where(['userId'=>Yii::$app->user->id])->all();
 
-		$shops = Shops::find()->where(['id_shop'=>$shopId])->one();
-		$templates = [];
-		if( is_object($shops) ){
-			$templates = $shops->getTemplates()->all();
+
+		if( !isset( $shopId ) || $shopId <= 0 ){
+			$shopId = current($userShops)->id_shop;
 		}
 
-
+		if( !isset( $templateId ) || $templateId <= 0 ){
+			$templateId = $templates[0]->id;
+		}
 		$_shops = [];
 		foreach($userShops as $k=>$v) {
 			$_shops[$k]['label'] = $v->name;
 			$_shops[$k]['url'] = $urlManager->createUrl( [
 					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
-					'shopId'=>$v->id_shop
+					'shopId'=>$v->id_shop,
+					'templateId'=>$templateId,
 				] );
 		}
 
@@ -92,6 +98,7 @@ class SiteController extends Controller
 					'templateId'=>$v->id
 				] );
 		}
+
 		return $this->render('index', ['shops'=>$_shops, 'shopId'=>$shopId, 'templates'=>$_templates, 'templateId'=>$templateId]);
     }
 
