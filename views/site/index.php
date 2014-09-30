@@ -1,7 +1,7 @@
 <?php
 /* @var $this yii\web\View */
 $this->title = 'Кабинет настройки XML шаблонов';
-?>
+?><?Yii::$app->request->getQueryParams()?>
 <div class="site-index">
 	<div class="left-block"><?
 		echo \yii\bootstrap\Nav::widget([
@@ -35,22 +35,17 @@ $this->title = 'Кабинет настройки XML шаблонов';
 				],
 			]);
 		?>
-
-	</div>
-	<div class="dropdown">
 		<?= \yii\bootstrap\ButtonDropdown::widget([
-				'label' => 'Выбор магазина',
+				'label' => $shopId != '' ? $shops[$shopId]['label'] : 'Выбор Магазина',
+				'options' => [
+					'class'=>'choose-shop'
+				],
 				'dropdown' => [
-					'options' => [
-						'class'=>'btn-group'
-					],
-					'items' => [
-						['label' => 'DropdownA', 'url' => '/'],
-						['label' => 'DropdownB', 'url' => '#'],
-					],
+					'items' => $shops,
 				],
 			]);
 		?>
 	</div>
+
 	<div class="center-block">@@@@@@</div>
 </div>

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\filters\PageCache;
 
 /**
  * This is the model class for table "users".
@@ -49,6 +50,20 @@ class Users extends \yii\db\ActiveRecord
 	public static function getDb()
 	{
 		return Yii::$app->get('db_AP');
+	}
+
+	public function getShops()
+	{
+		return $this->hasMany('app\models\Shops', ['id_user' => 'id_user']);
+		// Первый параметр – это у нас имя класса, с которым мы настраиваем связь.
+		// Во втором параметре в виде массива задаётся имя удалённого PK ключа  (id) и FK из текущей таблицы модели, которые связываются между собой
+	}
+
+	public function getAccessShops()
+	{
+		return $this->hasMany('app\models\AccessShops', ['id_user' => 'id_user']);
+		// Первый параметр – это у нас имя класса, с которым мы настраиваем связь.
+		// Во втором параметре в виде массива задаётся имя удалённого PK ключа  (id) и FK из текущей таблицы модели, которые связываются между собой
 	}
 
 	/**
@@ -106,5 +121,26 @@ class Users extends \yii\db\ActiveRecord
 	public function validatePassword($password)
 	{
 		return $this->password === MD5($password);
+	}
+
+	public function getUserShops( $userId = false )
+	{
+		if( $userId === false ){
+			$userId = Yii::$app->user->id;
+		}
+		$shops = [];
+		$userShops = $this->getShops()->where(['status'=>0])->all();
+		if( !empty($userShops) ){
+			foreach( $userShops as $v) {
+				$shops[$v->id_shop] = $v;
+			}
+		}
+		$accessShops = $this->getAccessShops()->all();
+		if( !empty($accessShops) ){
+			foreach( $accessShops as $k=>$v) {
+				$shops[$k] = $v->getShops()->where(['status'=>0])->one();
+			}
+		}
+		return $shops;
 	}
 }

@@ -2,6 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\Shops;
+use app\models\User;
+use app\models\Users;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -56,7 +59,15 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('index');
+		$users = Users::find()->where(['id_user'=>Yii::$app->user->id])->one();;
+		$userShops = $users->getUserShops();
+		$shops = [];
+		foreach($userShops as $k=>$v) {
+			$shops[$k]['label'] = $v->name;
+			$shops[$k]['url'] = "?shopId=".$v->id_shop;
+		}
+		$shopId = Yii::$app->request->getQueryParam('shopId');
+		return $this->render('index', ['shops'=>$shops, 'shopId'=>$shopId]);
     }
 
     public function actionLogin()

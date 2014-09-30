@@ -94,8 +94,21 @@ a.desc:after {
 	display: inline-block;
 	margin: 5px;
 	border: 1px solid #8b8b8b;
+	max-width: 380px;
 }
 
 .center-block {
 	display: inline-block;
+}
+
+.choose-shop {
+	min-width: 370px;
+	margin-top: 5px;
+}
+
+.dropdown-menu {
+	min-width: 370px;
+	max-height: 400px;
+	overflow: auto;
+
 }
