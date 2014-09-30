@@ -138,7 +138,8 @@ class Users extends \yii\db\ActiveRecord
 		$accessShops = $this->getAccessShops()->all();
 		if( !empty($accessShops) ){
 			foreach( $accessShops as $k=>$v) {
-				$shops[$k] = $v->getShops()->where(['status'=>0])->one();
+				$shop = $v->getShops()->where(['status'=>0])->one();
+				$shops[$shop->id_shop] = $shop;
 			}
 		}
 		return $shops;
