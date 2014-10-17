@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Categories;
 use app\models\Shops;
 use app\models\Templates;
 use app\models\User;
@@ -99,7 +100,11 @@ class SiteController extends Controller
 				] );
 		}
 
-		return $this->render('index', ['shops'=>$_shops, 'shopId'=>$shopId, 'templates'=>$_templates, 'templateId'=>$templateId]);
+		$cats = new Categories();
+		$cats->getCategoriesTree(266);
+
+		return $this->render('index', ['shops'=>$_shops, 'shopId'=>$shopId, 'templates'=>$_templates, 'templateId'=>$templateId,
+									   'cats'=>$cats->getCategoriesTree(266)]);
     }
 
     public function actionLogin()

@@ -39,7 +39,15 @@ class Categories extends \yii\db\ActiveRecord
         return 'categories';
     }
 
-    /**
+	/**
+	 * @return \yii\db\Connection the database connection used by this AR class.
+	 */
+	public static function getDb()
+	{
+		return Yii::$app->get('db_AP');
+	}
+
+	/**
      * @inheritdoc
      */
     public function rules()
@@ -81,4 +89,19 @@ class Categories extends \yii\db\ActiveRecord
             'hide_desc_header' => 'Hide Desc Header',
         ];
     }
+
+	public function getCategoriesTree( $shopId )
+	{
+		$cats = $this->find()->where(['id_shop'=>$shopId])->innerJoin( 'categories c1', 'c1.parent_id = ' )->all();
+		$result = [];
+		foreach($cats AS $v){
+//			$result[$v->id]['title'] = $v->title;
+//			$result[$v->id]['description'] = $v->description;
+			$result[$v->id]['parentId'] = $v->parent_id;
+			$result[$v->id]['key'] = $v->id;
+		}
+		$res = [];
+		return $res;
+
+	}
 }
