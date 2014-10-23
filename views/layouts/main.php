@@ -35,7 +35,6 @@ AppAsset::register($this);
             echo Nav::widget([
                 'options' => ['class' => 'navbar-nav navbar-right'],
                 'items' => [
-                    ['label' => 'Домой', 'url' => ['/site/index']],
 //                    ['label' => 'About', 'url' => ['/site/about']],
                     Yii::$app->user->isGuest ?
                         ['label' => 'Авторизоваться', 'url' => ['/site/login']] :
@@ -48,13 +47,6 @@ AppAsset::register($this);
         ?>
 
         <div class="container">
-            <?= Breadcrumbs::widget([
-                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-				'homeLink' => [
-					'label' => 'Домой',  // required
-					'url' => Yii::$app->homeUrl,      // optional, will be processed by Url::to()
-				]
-				]) ?>
             <?= $content ?>
         </div>
     </div>

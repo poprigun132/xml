@@ -90,18 +90,52 @@ class Categories extends \yii\db\ActiveRecord
         ];
     }
 
-	public function getCategoriesTree( $shopId )
-	{
-		$cats = $this->find()->where(['id_shop'=>$shopId])->innerJoin( 'categories c1', 'c1.parent_id = ' )->all();
-		$result = [];
-		foreach($cats AS $v){
-//			$result[$v->id]['title'] = $v->title;
-//			$result[$v->id]['description'] = $v->description;
-			$result[$v->id]['parentId'] = $v->parent_id;
-			$result[$v->id]['key'] = $v->id;
+	/**
+	 * Get categories tree
+	 *
+	 * @param $categories
+	 *
+	 * @return mixed
+	 */
+	static public function getCategoriesTree($categories){
+		$newCats = [];
+		foreach($categories as $cat){
+			$newCats[$cat->id]['title'] = $cat->title;
+			$newCats[$cat->id]['titleNew'] = $cat->id;
+			$newCats[$cat->id]['key'] = $cat->id;
+			$newCats[$cat->id]['parent_id'] = $cat->parent_id;
 		}
-		$res = [];
-		return $res;
+		$result = Categories::buildCategoriesTree($newCats,1);
+		return $result;
+	}
 
+	/**
+	 * Build categories tree
+	 *
+	 * @param array $categories
+	 * @param int $parentId
+	 *
+	 * @internal param $categories
+	 *
+	 * @return mixed
+	 */
+	static private function buildCategoriesTree($categories,$parentId = 0){
+		$branch = [];
+		foreach ($categories as $cat) {
+			$result[$cat['key']]['parentId'] = $cat['parent_id'];
+			if($cat['parent_id'] == 1){
+				$cat['expanded'] = true;
+			}
+			if ($cat['parent_id'] == $parentId) {
+				$children = Categories::buildCategoriesTree($categories, $cat['key']);
+				if ($children) {
+					$cat['children'] = $children;
+					$cat['folder'] = true;
+				}
+				$branch[] = $cat;
+			}
+		}
+
+		return $branch;
 	}
 }

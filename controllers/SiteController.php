@@ -2,19 +2,30 @@
 
 namespace app\controllers;
 
+use app\models\AccessShops;
 use app\models\Categories;
 use app\models\Shops;
 use app\models\Templates;
 use app\models\User;
 use app\models\Users;
+use app\models\UsersTemplates;
 use Yii;
+use yii\base\Exception;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
 use yii\web\UrlManager;
 
+/**
+ * Main controller
+ *
+ * Class SiteController
+ * @package app\controllers
+ */
 class SiteController extends Controller
 {
     public function behaviors()
@@ -60,53 +71,84 @@ class SiteController extends Controller
         ];
     }
 
-    public function actionIndex($shopId = false, $templateId = false)
+	/**
+	 * Main action
+	 *
+	 * @param null $shopId
+	 * @param bool $templateId
+	 *
+	 * @throws Exception
+	 * @return string
+	 */
+    public function actionIndex($shopId = null, $templateId = null)
     {
+		/*
 		$urlManager = new UrlManager();
 		$urlManager->enablePrettyUrl = true;
 		$urlManager->showScriptName = false;
-
-
-
-		$users = Users::find()->where(['id_user'=>Yii::$app->user->id])->one();;
-		$userShops = $users->getUserShops();
-		$templates = Templates::find()->where(['userId'=>Yii::$app->user->id])->all();
-
-
-		if( !isset( $shopId ) || $shopId <= 0 ){
+		*/
+		$shops = $templates = [];
+		$users = Users::findOne(['id_user'=>Yii::$app->user->id]);
+		$userShops = $users->userShops;
+		$userShops = ArrayHelper::index($userShops, 'id_shop');
+		/*if($shopId === null && !empty($userShops)){
 			$shopId = current($userShops)->id_shop;
+		}*/
+
+		$userTemplates = $users->userTemplatesData;
+		$userTemplates = ArrayHelper::index($userTemplates,'id');
+		if($templateId === null && !empty($userTemplates)){
+			$templateId = current($userTemplates)->id;
 		}
 
-		if( !isset( $templateId ) || $templateId <= 0 ){
-			$templateId = $templates[0]->id;
-		}
-		$_shops = [];
+		//$shopsCategories = Shops::findOne(['id_shop'=>$shopId]);
+		//$categoriesTree = Categories::getCategoriesTree($shopsCategories->shopsCategories);
+
 		foreach($userShops as $k=>$v) {
-			$_shops[$k]['label'] = $v->name;
-			$_shops[$k]['url'] = $urlManager->createUrl( [
+			$shops[$k]['name'] = $v->name;
+			$shops[$k]['id'] = $k;
+		/*	$_shops[$k]['url'] = $urlManager->createUrl( [
 					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
 					'shopId'=>$v->id_shop,
 					'templateId'=>$templateId,
-				] );
+				] );*/
 		}
 
-		$_templates = [];
-		foreach($templates as $k=>$v) {
-			$_templates[$v->id]['label'] = $v->name;
-			$_templates[$v->id]['url'] = $urlManager->createUrl( [
+		foreach($userTemplates as $k=>$v) {
+			$templates[$v->id]['name'] = $v->name;
+			$templates[$v->id]['id'] = $v->id;
+		/*	$_templates[$v->id]['url'] = $urlManager->createUrl( [
 					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
 					'shopId'=>$shopId,
 					'templateId'=>$v->id
-				] );
+			] );*/
 		}
-
-		$cats = new Categories();
-		$cats->getCategoriesTree(266);
-
-		return $this->render('index', ['shops'=>$_shops, 'shopId'=>$shopId, 'templates'=>$_templates, 'templateId'=>$templateId,
-									   'cats'=>$cats->getCategoriesTree(266)]);
+		$tree = $this->renderPartial('tree',['cats'=>[]]);
+		return $this->render('index', [
+										'shops'=>$shops,
+										'shopId'=>$shopId,
+										'templates'=>$templates,
+										'templateId'=>$templateId,
+									    'categoriesTree'=>$tree,
+										'shop'=> new Shops(),
+			]
+		);
     }
 
+	/**
+	 * Rebuild shop categories
+	 * @return string
+	 */
+	public function actionChangeShop(){
+		$idShop = Yii::$app->request->post('idShop');
+		$shopsCategories = Shops::findOne(['id_shop'=>$idShop]);
+		$categoriesTree = Categories::getCategoriesTree($shopsCategories->shopsCategories);
+		return $this->renderAjax('tree',['cats'=>$categoriesTree]);
+	}
+
+	/**
+	 * @return string|\yii\web\Response
+	 */
     public function actionLogin()
     {
         if (!\Yii::$app->user->isGuest) {
@@ -126,7 +168,6 @@ class SiteController extends Controller
     public function actionLogout()
     {
         Yii::$app->user->logout();
-
         return $this->goHome();
     }
 
@@ -135,7 +176,6 @@ class SiteController extends Controller
         $model = new ContactForm();
         if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
             Yii::$app->session->setFlash('contactFormSubmitted');
-
             return $this->refresh();
         } else {
             return $this->render('contact', [

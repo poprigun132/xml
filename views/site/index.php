@@ -1,9 +1,18 @@
 <?php
 /* @var $this yii\web\View */
-$this->title = 'Кабинет настройки XML шаблонов';
+/* @var $shop Shops */
+$this->title = 'Страница настройки XML шаблонов';
+use yii\helpers\Html;
+use yii\helpers\ArrayHelper;
+use app\models\Shops;
+use yii\helpers\Url as Url;
+use yii\widgets\ActiveForm;
+use kartik\widgets\Select2;
+use yii\web\JsExpression;
 ?>
 <div class="site-index">
-	<div class="left-block"><?= \yii\bootstrap\Nav::widget([
+	<div class="left-block">
+		<?= \yii\bootstrap\Nav::widget([
 				'options' => ['class' => 'nav nav-pills'],
 				'items' => [
 					[
@@ -33,56 +42,51 @@ $this->title = 'Кабинет настройки XML шаблонов';
 					],
 				],
 			]);
-		?>Магазин:<br>
-		<?= \yii\bootstrap\ButtonDropdown::widget([
-				'label' => $shopId != '' ? $shops[$shopId]['label'] : 'Выбор Магазина',
-				'options' => [
-					'class'=>'choose-shop'
-				],
-				'dropdown' => [
-					'items' => $shops,
-				],
-			]);
-		?><br>Шаблон<br>
-		<?= \yii\bootstrap\ButtonDropdown::widget([
-				'label' => $templateId != '' ? $templates[$templateId]['label'] : 'Выбор Шаблона',
-				'options' => [
-					'class'=>'choose-shop'
-				],
-				'dropdown' => [
-					'items' => $templates,
-				],
-			]);
 		?><br>
-		<?php
-		// Example of data.
-		$data = [
-			['title' => 'Node 1', 'key' => 1],
-			['title' => 'Folder 2', 'key' => '38', 'lazy'=>true, 'folder' => true, 'children' => [
-				['title' => 'Node 2.1', 'key' => '3'],
-				['title' => 'Node 2.2', 'key' => '4']
-			]]
-		];
 
-		echo \wbraganca\fancytree\FancytreeWidget::widget([
-				'options' =>[
-					'checkbox'=>true,
-					'icons'=>true,
-					'selectMode'=>3,
-					'source' => $cats,
-					'extensions' => ['dnd'],
-					'dnd' => [
-						'preventVoidMoves' => true,
-						'preventRecursiveMoves' => true,
-						'autoExpandMS' => 400,
-						'dragStart' => new \yii\web\JsExpression('function(node, data) { return false; }'),
-						'dragEnter' => new \yii\web\JsExpression('function(node, data) { return false; }'),
-						'dragDrop' => new \yii\web\JsExpression('function(node, data) { data.otherNode.moveTo(node, data.hitMode); }'),
-					],
+		<?
+		/**
+		 * Build html form
+		 */
+		$form = ActiveForm::begin(['options' => ['enctype'=>'multipart/form-data']]);?>
+
+		<?echo $form->field($shop, 'id_shop')->label('Магазины')->widget(Select2::classname(), [
+				'data' => ArrayHelper::map($shops, 'id', 'name'),
+				'options' => [
+					'placeholder' => 'Select ...',
+				],
+				'pluginEvents' =>[
+					'change' => 'function() { updateCategoriesTree(); }'
 				]
 			]);
 		?>
-
+		<?echo $form->field($shop, 'name')->label('Выбор шаблона XML')->widget(Select2::classname(), [
+				'data'=> ArrayHelper::map($templates, 'id', 'name'),
+				'options' => [
+					'placeholder' => 'Select ...',
+				],
+			]);
+		?>
+		<br>
+		<?echo Html::label('Категории магазина')?>
+		<br>
+		<?echo Html::input('text','categoryAttr',null,[
+				'id'=>'categoryAttr',
+				'class'=>'form-control',
+				'placeholder'=>'Ключ категории',
+			]);
+		?>
+		<div id="categories-tree">
+			<?echo $categoriesTree?>
+		</div>
+		<br>
+		<?echo Html::submitButton('Сгенерировать',['class'=>'btn btn-primary form-control'])?>
+		<?
+		/**
+		 * End html form
+		 */
+		ActiveForm::end()
+		?>
 	</div>
 
 	<div class="center-block">@@@@@@</div>
