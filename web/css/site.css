@@ -11,7 +11,7 @@ body {
 }
 
 .wrap > .container {
-    padding: 60px 0;
+    padding: 60px 20px;
 }
 
 .footer {
@@ -90,16 +90,6 @@ a.desc:after {
     margin: 0 0 15px 0;
 }
 
-.left-block, .center-block{
-	display: inline-block;
-	margin-top: 5px;
-	border: 1px solid #8b8b8b;
-	border-radius: 5px;
-	padding: 5px;
-	vertical-align: top;
-}
-
-
 .choose-shop {
 	min-width: 370px;
 	margin-top: 5px;
@@ -112,3 +102,74 @@ a.desc:after {
 	overflow: auto;
 
 }
+
+.containerMy{
+	width: auto !important;
+}
+
+.containerMy .left-block, .containerMy .center-block{
+	margin-top: 5px;
+	border: 1px solid #8b8b8b;
+	border-radius: 5px;
+	padding: 5px;
+}
+
+.left-block.col-lg-offset-1{
+	margin-left: 4.333% ;
+}
+
+.containerMy .center-block{
+	margin-left: 10px;
+}
+
+.center-block .nav-tabs{
+	text-align: left;
+}
+.noLink {
+	pointer-events: none;
+}
+/*-----------Main Setting Page----------------*/
+.mainData{
+	width: 70%;
+	margin-left: 4.333%;
+}
+.group-data{
+	float: left;
+	width: 100%;
+	margin-bottom: 10px;
+}
+.padding-top-ten{
+	padding-top: 10px;
+}
+.margin-left-ten{
+	margin-left: 10px;
+}
+.shadow-none{
+	box-shadow: none;
+}
+.inline-block{
+	width: 100%;
+	display: inline-block;
+}
+.main-settings-checkbox{
+	padding-left: 0;
+}
+.main-settings-checkbox label{
+	padding: 5px;
+	width: 32%;
+}
+/*----------/Main Setting Page/---------------*/
+
+/*-----------Model Setting Page---------------*/
+.modelSettings{
+	width: 70%;
+	margin-left: 4.333%;
+}
+/*----------/Model Setting Page/---------------*/
+
+/*---------Model Characteristics Page-----------*/
+.modelCharacteristics{
+	width: 70%;
+	margin-left: 4.333%;
+}
+/*--------/Model Characteristics Page/----------*/

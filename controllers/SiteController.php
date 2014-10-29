@@ -4,13 +4,19 @@ namespace app\controllers;
 
 use app\models\AccessShops;
 use app\models\Categories;
+use app\models\CategoriesSettings;
+use app\models\Currency;
+use app\models\Encoding;
 use app\models\Shops;
+use app\models\Sort;
 use app\models\Templates;
 use app\models\User;
 use app\models\Users;
+use app\models\UsersSettings;
 use app\models\UsersTemplates;
 use Yii;
 use yii\base\Exception;
+use yii\db\ActiveQuery;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
@@ -82,11 +88,6 @@ class SiteController extends Controller
 	 */
     public function actionIndex($shopId = null, $templateId = null)
     {
-		/*
-		$urlManager = new UrlManager();
-		$urlManager->enablePrettyUrl = true;
-		$urlManager->showScriptName = false;
-		*/
 		$shops = $templates = [];
 		$users = Users::findOne(['id_user'=>Yii::$app->user->id]);
 		$userShops = $users->userShops;
@@ -107,30 +108,22 @@ class SiteController extends Controller
 		foreach($userShops as $k=>$v) {
 			$shops[$k]['name'] = $v->name;
 			$shops[$k]['id'] = $k;
-		/*	$_shops[$k]['url'] = $urlManager->createUrl( [
-					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
-					'shopId'=>$v->id_shop,
-					'templateId'=>$templateId,
-				] );*/
 		}
 
 		foreach($userTemplates as $k=>$v) {
 			$templates[$v->id]['name'] = $v->name;
 			$templates[$v->id]['id'] = $v->id;
-		/*	$_templates[$v->id]['url'] = $urlManager->createUrl( [
-					Yii::$app->requestedAction->controller->id.'/'.Yii::$app->requestedAction->id,
-					'shopId'=>$shopId,
-					'templateId'=>$v->id
-			] );*/
 		}
 		$tree = $this->renderPartial('tree',['cats'=>[]]);
+
 		return $this->render('index', [
-										'shops'=>$shops,
-										'shopId'=>$shopId,
-										'templates'=>$templates,
-										'templateId'=>$templateId,
-									    'categoriesTree'=>$tree,
-										'shop'=> new Shops(),
+										'shops' => $shops,
+										'shopId' => $shopId,
+										'templates' => $templates,
+										'templateId' => $templateId,
+									    'categoriesTree' => $tree,
+										'shop' => new Shops(),
+										'value'=> null,
 			]
 		);
     }
@@ -141,9 +134,140 @@ class SiteController extends Controller
 	 */
 	public function actionChangeShop(){
 		$idShop = Yii::$app->request->post('idShop');
-		$shopsCategories = Shops::findOne(['id_shop'=>$idShop]);
-		$categoriesTree = Categories::getCategoriesTree($shopsCategories->shopsCategories);
+		$shop = Shops::findOne(['id_shop'=>$idShop]);
+		$categoriesTree = Categories::getCategoriesTree($shop);
 		return $this->renderAjax('tree',['cats'=>$categoriesTree]);
+	}
+
+	/**
+	 * Get page main settings
+	 *
+	 * @return string
+	 */
+	public function actionMainSettings(){
+		$template = Templates::findOne(['id'=>1]);
+		$tempSort = empty($template->sort)?'':$template->sort;
+		$tempEncode = empty($template->encode)?'':$template->encode;
+		$mainSetting = $this->renderAjax('mainSettings',[
+				'encodes' => Encoding::find()->asArray()->all(),
+				'tempEncode' => $tempEncode,
+				'currency' => Currency::find()->asArray()->all(),
+				'sort' => Sort::find()->asArray()->all(),
+				'tempSort' => $tempSort,
+			]
+		);
+		return Json::encode($mainSetting);
+	}
+
+	/**
+	 * Get page model settings
+	 *
+	 * @return string
+	 */
+	public function actionModelSettings(){
+		$modelSetting = $this->renderAjax('modelSettings',[
+
+			]
+		);
+		return Json::encode($modelSetting);
+	}
+
+	/**
+	 * Get page model characteristics
+	 *
+	 * @return string
+	 */
+	public function actionModelCharacteristics(){
+		$modelSetting = $this->renderAjax('modelCharacteristics',[
+
+			]
+		);
+		return Json::encode($modelSetting);
+	}
+	/**
+	 * Save selected categories
+	 */
+	public function actionSaveSelectedCategories(){
+		$idShop = Yii::$app->request->post('idShop');
+		$categories = Yii::$app->request->post('cats',[]);
+
+		$shop = Shops::findOne(['id_shop'=>$idShop]);
+		$categories = Categories::buildSelectedCategories($shop->shopsCategories,$categories);
+		$categories = array_map(function($row)use($idShop){
+								return [$idShop,$row['id'], $row['select']];
+			},$categories);
+		CategoriesSettings::setCategorySettings($categories);
+	}
+
+	/**
+	 * Save user key
+	 */
+	public function actionSaveUserKey(){
+		$idShop = Yii::$app->request->post('idShop');
+		$categoryId = Yii::$app->request->post('cat');
+		$categoryKey = Yii::$app->request->post('userKey');
+
+		$setting = CategoriesSettings::findOne(['id_shop'=>$idShop,'id_category'=>$categoryId]);
+		if($setting === null){
+			$setting = new CategoriesSettings();
+		}
+		if(empty($categoryKey)){
+			$categoryKey = null;
+		}
+		$setting->id_category = $categoryId;
+		$setting->id_shop = $idShop;
+		$setting->category_key = $categoryKey;
+		$setting->save();
+	}
+
+	/**
+	 * Save user shop and template
+	 */
+	public function actionSaveUserShopTemplate(){
+		$idShop = Yii::$app->request->post('idShop');
+		$idTemplate = Yii::$app->request->post('idTemplate');
+
+		$usersSettings = UsersSettings::findOne(['id_shop'=>$idShop]);
+		if($usersSettings === null){
+			$usersSettings = new UsersSettings();
+		}
+		$usersSettings->id_shop = $idShop;
+		$usersSettings->id_template = $idTemplate;
+		$usersSettings->save();
+
+		$mainSetting = $this->renderAjax('mainSettings',[
+				'encodes' => Encoding::find()->asArray()->all(),
+				'encode' => new Encoding(),
+				'currency' => Currency::find()->asArray()->all(),
+				'sort' => Sort::find()->asArray()->all(),
+				'sortModel' => new Sort(),
+			]
+		);
+		return $mainSetting;
+	}
+
+	/**
+	 * Save template encode
+	 */
+	public function actionSaveTemplateEncode(){
+		$idTemplate = Yii::$app->request->post('idTemplate');
+		$idEncode = Yii::$app->request->post('encode');
+
+		$templates = Templates::findOne(['id'=>$idTemplate]);
+		$templates->encode = $idEncode;
+		$templates->save();
+	}
+
+	/**
+	 * Save template sort
+	 */
+	public function actionSaveTemplateSort(){
+		$idTemplate = Yii::$app->request->post('idTemplate');
+		$idSort = Yii::$app->request->post('sort');
+
+		$templates = Templates::findOne(['id'=>$idTemplate]);
+		$templates->sort = $idSort;
+		$templates->save();
 	}
 
 	/**
@@ -169,23 +293,5 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
         return $this->goHome();
-    }
-
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-            return $this->refresh();
-        } else {
-            return $this->render('contact', [
-                'model' => $model,
-            ]);
-        }
-    }
-
-    public function actionAbout()
-    {
-        return $this->render('about');
     }
 }

@@ -6,20 +6,19 @@ use Yii;
 use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "users_settings".
+ * This is the model class for table "parent_models".
  *
  * @property integer $id
- * @property integer $id_template
- * @property integer $id_shop
+ * @property string $name
  */
-class UsersSettings extends ActiveRecord
+class ParentModels extends ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'users_settings';
+        return 'parent_models';
     }
 
     /**
@@ -28,9 +27,8 @@ class UsersSettings extends ActiveRecord
     public function rules()
     {
         return [
-            [['id_template', 'id_shop'], 'required'],
-            [['id_template', 'id_shop'], 'integer'],
-            [['id_shop'], 'unique']
+            [['name'], 'required'],
+            [['name'], 'string', 'max' => 100]
         ];
     }
 
@@ -41,8 +39,7 @@ class UsersSettings extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'id_template' => 'Id Template',
-            'id_shop' => 'Id Shop',
+            'name' => 'Name',
         ];
     }
 }
