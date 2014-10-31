@@ -13,8 +13,6 @@ use yii\db\ActiveRecord;
  * @property double $general
  * @property integer $sort
  * @property integer $encode
- * @property integer $currency
- * @property integer $currency_default
  * @property string $template
  * @property string $createDate
  */
@@ -34,9 +32,9 @@ class Templates extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'sort', 'encode', 'currency', 'currency_default', 'template'], 'required'],
+            [['name', 'sort', 'encode', 'template'], 'required'],
             [['general'], 'number'],
-            [['sort', 'encode', 'currency', 'currency_default'], 'integer'],
+            [['sort', 'encode'], 'integer'],
             [['template'], 'string'],
             [['createDate'], 'safe'],
             [['name'], 'string', 'max' => 50]
@@ -54,8 +52,6 @@ class Templates extends ActiveRecord
             'general' => 'General',
             'sort' => 'Sort',
             'encode' => 'Encode',
-            'currency' => 'Currency',
-            'currency_default' => 'Currency Default',
             'template' => 'Template',
             'createDate' => 'Create Date',
         ];

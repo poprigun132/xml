@@ -8,7 +8,7 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "parent_models".
  *
- * @property integer $id
+ * @property integer $id_model
  * @property string $name
  */
 class ParentModels extends ActiveRecord
@@ -38,7 +38,7 @@ class ParentModels extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id_model' => 'Id Model',
             'name' => 'Name',
         ];
     }

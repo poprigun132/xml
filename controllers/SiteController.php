@@ -6,7 +6,11 @@ use app\models\AccessShops;
 use app\models\Categories;
 use app\models\CategoriesSettings;
 use app\models\Currency;
+use app\models\CurrencySettings;
 use app\models\Encoding;
+use app\models\Models;
+use app\models\ModelSettings;
+use app\models\ParentModels;
 use app\models\Shops;
 use app\models\Sort;
 use app\models\Templates;
@@ -14,6 +18,7 @@ use app\models\User;
 use app\models\Users;
 use app\models\UsersSettings;
 use app\models\UsersTemplates;
+use Symfony\Component\Console\Helper\Helper;
 use Yii;
 use yii\base\Exception;
 use yii\db\ActiveQuery;
@@ -145,15 +150,39 @@ class SiteController extends Controller
 	 * @return string
 	 */
 	public function actionMainSettings(){
-		$template = Templates::findOne(['id'=>1]);
+		$idTemplate = Yii::$app->request->get('idTemplate');
+		$template = Templates::findOne(['id'=>$idTemplate]);
 		$tempSort = empty($template->sort)?'':$template->sort;
 		$tempEncode = empty($template->encode)?'':$template->encode;
+		$encode = Encoding::find()->asArray()->all();
+		$currency = Currency::find()->asArray()->all();
+		$currencySettings = CurrencySettings::find()->where(['id_template'=>$idTemplate])->asArray()->all();
+		$currencySettings = ArrayHelper::index($currencySettings,'id_currency');
+		$selectionCurrency = [];
+		foreach($currency as $key=>$value){
+			if(!ArrayHelper::keyExists($value['id_currency'],$currencySettings)){
+				$designation = null;
+				$ratio = null;
+				$defaultCurrency = null;
+			}else{
+				$designation = $currencySettings[$value['id_currency']]['designation'];
+				$ratio = $currencySettings[$value['id_currency']]['ratio'];
+				$defaultCurrency = $currencySettings[$value['id_currency']]['default_currency'];
+				$selectionCurrency[$key] = $value['id_currency'];
+			}
+			$currency[$key]['designation'] = $designation;
+			$currency[$key]['ratio'] = $ratio;
+			$currency[$key]['default_currency'] = $defaultCurrency;
+		}
+		$sort = Sort::find()->asArray()->all();
 		$mainSetting = $this->renderAjax('mainSettings',[
-				'encodes' => Encoding::find()->asArray()->all(),
+				'encodes' => $encode,
 				'tempEncode' => $tempEncode,
-				'currency' => Currency::find()->asArray()->all(),
-				'sort' => Sort::find()->asArray()->all(),
+				'currency' => $currency,
+				'sort' => $sort,
 				'tempSort' => $tempSort,
+				'currencySettings' => $currencySettings,
+				'selectionCurrency' => $selectionCurrency,
 			]
 		);
 		return Json::encode($mainSetting);
@@ -165,8 +194,12 @@ class SiteController extends Controller
 	 * @return string
 	 */
 	public function actionModelSettings(){
+		$idTemplate = Yii::$app->request->get('idTemplate');
+		$parentModels = ParentModels::find()->asArray()->all();
+		$models = ModelSettings::getModelsSettings($idTemplate,$parentModels);
 		$modelSetting = $this->renderAjax('modelSettings',[
-
+				'models' => $models,
+				'parentModels' => ArrayHelper::map($parentModels,'id_model','name'),
 			]
 		);
 		return Json::encode($modelSetting);
@@ -234,16 +267,6 @@ class SiteController extends Controller
 		$usersSettings->id_shop = $idShop;
 		$usersSettings->id_template = $idTemplate;
 		$usersSettings->save();
-
-		$mainSetting = $this->renderAjax('mainSettings',[
-				'encodes' => Encoding::find()->asArray()->all(),
-				'encode' => new Encoding(),
-				'currency' => Currency::find()->asArray()->all(),
-				'sort' => Sort::find()->asArray()->all(),
-				'sortModel' => new Sort(),
-			]
-		);
-		return $mainSetting;
 	}
 
 	/**
@@ -270,6 +293,50 @@ class SiteController extends Controller
 		$templates->save();
 	}
 
+	/**
+	 * Save template currency settings
+	 */
+	public function actionSaveCurrencySettings(){
+		$idTemplate = Yii::$app->request->post('idTemplate');
+		$idCurrency = Yii::$app->request->post('idCurrency');
+		$designation = Yii::$app->request->post('designation');
+		$ratio = Yii::$app->request->post('ration',1);
+		$default = Yii::$app->request->post('defaultCurrency',0);
+
+		$currencySetting = CurrencySettings::findOne(['id_template'=>$idTemplate,'id_currency'=>$idCurrency]);
+		if($currencySetting === null){
+			$currencySetting = new CurrencySettings();
+			$currencySetting->id_template = $idTemplate;
+			$currencySetting->id_currency = $idCurrency;
+		}
+		$currencySetting->designation = $designation;
+		$currencySetting->ratio = $ratio;
+		$currencySetting->default_currency = $default;
+		$currencySetting->save();
+	}
+
+	/**
+	 * Delete template currency
+	 */
+	public function actionDeleteTemplateCurrency(){
+		$idTemplate = Yii::$app->request->post('idTemplate');
+		$idCurrency = Yii::$app->request->post('idCurrency');
+		CurrencySettings::deleteAll(['id_template'=>$idTemplate,'id_currency'=>$idCurrency]);
+	}
+
+	/**
+	 * Save or delete select/unselect model
+	 */
+	public function actionSelectModelSettings(){
+		$idTemplate = Yii::$app->request->post('idTemplate');
+		$idModel = Yii::$app->request->post('idModel');
+		$checked = Yii::$app->request->post('checked',1);
+		$parent = Yii::$app->request->post('parent');
+		$marketPlace = Yii::$app->request->post('marketPlace');
+		$count = (int)Yii::$app->request->post('count',0);
+
+		ModelSettings::changeSelectModel($idTemplate,$idModel,$checked,$marketPlace,$parent,$count);
+	}
 	/**
 	 * @return string|\yii\web\Response
 	 */

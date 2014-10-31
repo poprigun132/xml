@@ -36,38 +36,43 @@ function getTreeSelectedKey(selected){
 }
 /**
  * Save selected shop
- * @param object data
  */
-function saveSelectedShop(data){
-	var idShop = data.val;
+function saveSelectedShop(){
+	var idShop = $('select[name=shops] option:selected').val();
 	var idTemplate = $('select[name=templates] option:selected').val();
+
 	if(idShop.length > 0 && idTemplate.length > 0){
 		$.ajax({
 			url : '/site/save-user-shop-template/',
 			type: 'POST',
 			data: {idShop: idShop,idTemplate:idTemplate}
-		}).done(function(data){
-			tabs(data);
 		});
 	}
 }
 /**
- * Save selected template
+ * Change template
  * @param object data
  */
-function saveSelectedTemplate(data){
+function changeTemplate(data){
 	var idTemplate = data.val;
-	var idShop = $('select[name=shops] option:selected').val();
-	if(idShop.length > 0 && idTemplate.length > 0){
-		$.ajax({
-			url : '/site/save-user-shop-template/',
-			type: 'POST',
-			data: {idShop: idShop,idTemplate:idTemplate}
-		}).done(function(data){
-			tabs(data);
-		});
-	}
-
+	changeUrlTemplate(idTemplate);
+	currentBreadcrumbs();
+	deleteNoLink($('.ajax-tabs'));
+}
+/**
+ * Change tabs-url template id
+ */
+function changeUrlTemplate(idTemplate){
+	$('.nav-tabs li a').each(function(){
+		var url = $(this).attr('data-url');
+		if(url != undefined){
+			if(url.indexOf('idTemplate') == -1){
+				$(this).attr('data-url',url+'?idTemplate='+idTemplate);
+			}else{
+				$(this).attr('data-url',url.replace(/idTemplate=([0-9]+)/g,'idTemplate='+idTemplate));
+			}
+		}
+	});
 }
 /**
  * Save selected categories
@@ -129,6 +134,12 @@ function saveUserKey(category,node){
 	});
 }
 /**
+ * Tabs button @Current@
+ */
+function currentBreadcrumbs(){
+	$('.nav-tabs').find('.active').find('a').click();
+}
+/**
  * Tabs button @Next@
  */
 function nextBreadcrumbs(){
@@ -167,4 +178,82 @@ function saveTemplateSort(data){
 		type: 'POST',
 		data: {idTemplate: idTemplate,sort:data}
 	});
+}
+/**
+ * Delete class noLink
+ * @param data
+ */
+function deleteNoLink(data){
+	$(data).removeClass('noLink');
+}
+/**
+ * Delete template currency
+ * @param int idTemplate
+ * @param int currency
+ */
+function unselectCurrency(idTemplate,currency){
+	$.ajax({
+		url : '/site/delete-template-currency/',
+		type: 'POST',
+		data: {idTemplate: idTemplate,idCurrency:currency}
+	});
+}
+/**
+ * Save template currency data
+ * @param data
+ * @returns {boolean}
+ */
+function saveCurrencySettings(idCurrency){
+
+	var idTemplate = $("select[name=templates] option:selected").val();
+	var designation =$("input[name=currency_param_"+idCurrency+"]").val();
+	var ration = $("input[name=currency_ratio_"+idCurrency+"]").val();
+	var defaultCurrency = 0;
+	if($("div.main-setting-hidden[currency="+idCurrency+"]").find("input[name=defaultCurrency]").is(":checked")){
+		defaultCurrency = 1;
+	}
+	if(designation.length == 0 || ration.length == 0 || idTemplate.length == 0)
+		return false;
+	else{
+		$.ajax({
+			url : "/site/save-currency-settings/",
+			type: "POST",
+			data: {
+				idTemplate: idTemplate,
+				idCurrency:idCurrency,
+				designation:designation,
+				ration:ration,
+				defaultCurrency:defaultCurrency
+			}
+		});
+	}
+}
+/**
+ * save/delete select Model
+ * @param data
+ */
+function changeSelectModel(idModel){
+	var checked = false;
+	var idTemplate = $("select[name=templates] option:selected").val();
+	var marketPlace = $('input[name="marketplace_'+idModel+'"]').val();
+	var count = $('input[name="count_'+idModel+'"]').val();
+	var parent = $('select[name="model_'+idModel+'"] option:selected').val();
+	if($('input[name="checkbox_'+idModel+'"]').is(':checked')){
+		checked = true;
+	}
+	if(checked){
+		$.ajax({
+			url : "/site/select-model-settings/",
+			type: "POST",
+			data: {
+				idTemplate: idTemplate,
+				idModel:idModel,
+				marketPlace:marketPlace,
+				count:count,
+				parent:parent,
+				checked:checked
+			}
+		});
+	}
+
 }

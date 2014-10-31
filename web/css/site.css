@@ -125,51 +125,84 @@ a.desc:after {
 .center-block .nav-tabs{
 	text-align: left;
 }
+
 .noLink {
 	pointer-events: none;
 }
+
+.template-name{
+	width: 100%;
+	border: none !important;
+	margin-bottom: 10px;
+}
+
+.margin-left-ten{
+	margin-left: 10px;
+}
 /*-----------Main Setting Page----------------*/
 .mainData{
-	width: 70%;
+	width: 85%;
 	margin-left: 4.333%;
+	display: inline-block;
 }
+
 .group-data{
 	float: left;
 	width: 100%;
 	margin-bottom: 10px;
 }
+
 .padding-top-ten{
 	padding-top: 10px;
 }
-.margin-left-ten{
-	margin-left: 10px;
+
+.margin-top-10{
+	margin-top: 10px !important;
+}
+.margin-right-15{
+	margin-right: 15px !important;
+}
+
+.padding-reset{
+	padding: 0 !important;
+}
+.padding-right-4{
+	padding-right: 4px;
 }
 .shadow-none{
 	box-shadow: none;
 }
-.inline-block{
-	width: 100%;
-	display: inline-block;
-}
+
 .main-settings-checkbox{
 	padding-left: 0;
 }
+
 .main-settings-checkbox label{
 	padding: 5px;
 	width: 32%;
+}
+
+.main-setting-hidden{
+	display: none;
+	margin-bottom: 10px;
+}
+.main-setting-hidden label{
+	padding-top: 6px;
 }
 /*----------/Main Setting Page/---------------*/
 
 /*-----------Model Setting Page---------------*/
 .modelSettings{
-	width: 70%;
+	width: 85%;
 	margin-left: 4.333%;
+	display: inline-block;
 }
 /*----------/Model Setting Page/---------------*/
 
 /*---------Model Characteristics Page-----------*/
 .modelCharacteristics{
-	width: 70%;
+	width: 85%;
 	margin-left: 4.333%;
+	display: inline-block;
 }
 /*--------/Model Characteristics Page/----------*/

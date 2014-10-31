@@ -20,6 +20,7 @@ use Yii;
  * @property integer $1c_id
  * @property string $url
  * @property double $coefficient
+ * @property ModelSettings ModelSettings
  */
 class Models extends \yii\db\ActiveRecord
 {
@@ -77,4 +78,5 @@ class Models extends \yii\db\ActiveRecord
             'coefficient' => 'Coefficient',
         ];
     }
+
 }
